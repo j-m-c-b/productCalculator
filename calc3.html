@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calc3</title>
+    <style>
+        #domTotalPrice {
+            border-color: green;
+            border-width: 2px;
+            border-style: dotted;
+            font-size: 1.2em;
+        }
+
+
+        body {
+            background-color: black;
+            color: white;
+        }
+
+        input,
+        textarea {
+
+            color: white;
+            background-color: rgb(71, 94, 129);
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: grey;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .price {
+            text-align: right;
+        }
+
+        .closeButtom {
+            background-color: rgb(15, 13, 13);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .quantityButtom {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        thead {
+            display: block;
+        }
+
+        table {
+            display: block;
+            overflow-y: scroll;
+            max-height: 400px;
+        }
+
+        thead th,
+        tbody td {
+            width: 70px;
+        }
+
+        #ultimate {
+            text-align: right;
+        }
+
+        button {
+            font-size: 1em;
+        }
+
+        #domTxtSearchP:focus {
+            border-color: green;
+            border-width: 4px;
+            border-style: solid;
+        }
+
+        #domTxtSearchP {
+            border-color: rgb(100, 86, 86);
+            border-width: 4px;
+            border-style: solid;
+        }
+
+        table {
+            font-size: 0.86em;
+        }
+
+        .positive {
+            background-color: green;
+        }
+
+        .negative {
+            background-color: rgb(87, 5, 5);
+        }
+
+        #ultimate,
+        #lastProduct {
+            font-size: 0.79em;
+        }
+
+        #domTxtSearchP {
+            height: 2em;
+        }
+    </style>
+</head>
+
+<body>
+
+
+
+    <br>
+
+    <input id="domTxtSearchP" type="text">
+    <div id="domProductPlace"></div>
+
+
+
+
+    <hr>
+    <h3>Total: <span id="domTotalPrice"></span></h3>
+    <!-- <div id="ultimate"> <b>Ultimo P:</b> <span id="lastProduct"></span></div> -->
+    <hr>
+    <div id="ultimate"> <i>Ultimo P</i> <span id="lastProduct"></span></div>
+    <hr>
+    <div id="containerTable">
+        <table id="tableProducts">
+            <tr>
+                <th>x</th>
+                <th>N</th>
+                <th>C</th>
+                <th>Precio</th>
+            </tr>
+        </table>
+
+    </div>
+
+
+
+
+    <br>
+    <br>
+
+    <h5>Zoom</h5>
+    <button onclick="changeZoom('+')">+</button>
+    <button onclick="changeZoom('-')">-</button>
+
+
+    <script>
+        let zoom = 1.1;
+        document.body.style.fontSize = `${zoom}em`;
+
+        function changeZoom(char) {
+            if (char === "-") {
+                zoom -= 0.065;
+            } else {
+                zoom += 0.065;
+            }
+
+
+            document.body.style.fontSize = `${zoom}em`;
+        }
+
+
+        let domTxtSearchP = document.getElementById("domTxtSearchP");
+
+
+        domTxtSearchP.value = "";
+        domTxtSearchP.focus();
+        let productsList = [
+            // index
+            // name,
+            // quantity ,
+            // price,
+
+
+        ]
+        function clearBarcodeBar() {
+            domTxtSearchP.value = "";
+        }
+
+
+        domTxtSearchP.addEventListener("keyup", function (event) {
+
+            if (event.key === "Enter") {
+
+                enter();
+
+            }
+            domTxtSearchP.focus();
+        });
+
+        let arr = [];
+        function enter() {
+            let text = domTxtSearchP.value.toLowerCase();
+            let itemWasFound = false;
+
+            if (text[0] === "+" || text[0] === "-" || !isNaN(parseInt(text[0]))) {
+                text = text.split(",").join("");
+                let nameText = "";
+                textSplit = text.split(" ");
+                if (textSplit.length > 1) {
+                    nameText = textSplit.slice(1, textSplit.length).join(" ");
+                    text = textSplit[0];
+                }
+
+
+                createProductItem(
+                    "",
+                    nameText.toUpperCase(),
+                    parseInt(text)
+
+                )
+
+                showProducts();
+                domTxtSearchP.value = "";
+                return;
+            } else if (text[0] === "e") {
+
+                text = text.trim().split(" ");
+                if (text[1] === "l" || text[1] === "u") {
+                    deleteProduct(productsList.length - 1);
+                } else {
+                    let num = parseInt(text[1].replace("x", ""));
+                    deleteProduct(num - 1);
+                }
+
+                domTxtSearchP.value = "";
+                return;
+
+            } else if (text[0] === "c") {
+
+                text = text.trim().split(" ");
+                if (text[1] === "l" || text[1] === "u") {
+                    changeQuantityText(productsList.length - 1, parseInt(text[2]));
+                } else {
+                    let num = parseInt(text[1].replace("x", ""));
+                    changeQuantityText(num - 1, parseInt(text[2]));
+                }
+
+                domTxtSearchP.value = "";
+                return;
+
+            } else if (text[0] === "i") {
+
+                //let info = { titulo, textoArr, type, tamaTitulo, tamaParrafo }
+                let p = productsList;
+                let info = {
+                    titulo: p[p.length - 1].name,
+                    textoArr: [formartNum(p[p.length - 1].price * p[p.length - 1].quantity)],
+                    type: "parrafo", tamaTitulo: "13", tamaParrafo: "12", justSee: false
+                }
+
+                window.open("showPDF.html?datos=" +
+                    JSON.stringify(info)
+
+
+                )
+                domTxtSearchP.value = "";
+                return;
+
+            } else if (text[0] === "d") {
+
+                let customName = "";
+                if (text.split(" ").length > 1) {
+                    customName += text.slice(2, text.length);
+                }
+                const date = new Date();
+                const filename = `Factura ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}_${date.getMinutes()}_${date.getSeconds()}.png`;
+
+
+                downloadasTextFile(`${customName} ${filename}.txt`, JSON.stringify(productsList))
+
+                domTxtSearchP.value = "";
+                return;
+
+            } else if (text[0] === "l") {
+                if (text.length > 1) {
+                    if (text[1] === "l") {
+                        // console.log(text.slice(2, text.length));
+                        productsList = JSON.parse(text.slice(2, text.length));
+                        showProducts();
+                        domTxtSearchP.value = "";
+                        return;
+                    }
+                }
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+            domTxtSearchP.value = "";
+        }
+
+
+        function createProductItem(barcode, name, price) {
+
+
+            productsList.push(
+                {
+                    index: productsList.length,
+                    name,
+                    price,
+                    quantity: 1,
+
+                }
+
+            )
+
+
+            return true;
+
+
+        }
+        function showProducts() {
+
+            document.getElementById("tableProducts").innerHTML = `<tr>
+<th>x</th>
+<th>N</th>
+<th>C</th>
+<th>Precio</th>
+</tr>`;
+            let totalPrice = 0;
+
+            for (let product of productsList) {
+                let tr = document.createElement("tr");
+
+
+
+                let td1 = document.createElement("td");
+                let td2 = document.createElement("td");
+                let td3 = document.createElement("td");
+                let td4 = document.createElement("td");
+
+
+
+                td1.innerHTML = `${product.index + 1}X`;
+                td2.textContent = product.name;
+                td3.textContent = product.quantity;
+                td4.textContent = formartNum(product.price * product.quantity);
+
+                td4.classList.add("price");
+                if (product.price > 0) {
+                    td1.classList.add("positive")
+                } else {
+                    td1.classList.add("negative")
+                }
+
+
+                td3.classList.add("quantityButtom");
+                td1.classList.add("closeButtom");
+
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                tr.appendChild(td3);
+                tr.appendChild(td4);
+
+                document.getElementById("tableProducts").appendChild(tr);
+
+
+
+                td1.addEventListener("click", function () {
+                    deleteProduct(product.index);
+
+                });
+
+
+                td3.addEventListener("click", function () {
+                    changeQuantity(product.index);
+
+                });
+
+
+
+                totalPrice += (product.price * product.quantity);
+
+            }
+            document.getElementById("domTotalPrice").innerText = formartNum(totalPrice);
+
+
+
+            var element = document.getElementById("tableProducts");
+            element.scrollTop = element.scrollHeight;
+
+            let lp = productsList[productsList.length - 1];
+            if (lp == undefined) {
+                lp = { name: "--", price: "" };
+            }
+
+            document.getElementById("lastProduct").innerText = `${lp.name.slice(0, 16)}: [${formartNum(lp.price)}]`;
+
+            //change title
+            document.title = formartNum(totalPrice);
+        }
+
+        function deleteProduct(index) {
+
+            for (let i = 0; i < productsList.length; i++) {
+                if (productsList[i].index === index) {
+                    productsList.splice(i, 1);
+                    break;
+                }
+
+            }
+
+            for (let i = 0; i < productsList.length; i++) {
+                productsList[i].index = i;
+            }
+            showProducts();
+        }
+        function changeQuantity(index) {
+
+            for (let i = 0; i < productsList.length; i++) {
+                if (productsList[i].index === index) {
+
+                    //change quantity
+                    let quantity = prompt(formartNum(productsList[i].price) + " | " + productsList[i].name)
+                    productsList[i].quantity = quantity || productsList[i].quantity;
+                    break;
+                }
+
+            }
+            showProducts();
+        }
+
+
+        function changeQuantityText(index, quantiyNum) {
+
+            for (let i = 0; i < productsList.length; i++) {
+                if (productsList[i].index === index) {
+
+                    //change quantity
+                    let quantity = quantiyNum;
+                    productsList[i].quantity = quantity || productsList[i].quantity;
+                    break;
+                }
+
+            }
+            showProducts();
+        }
+
+
+        function formartNum(num) {
+            return new Intl.NumberFormat('en-US').format(num);
+        }
+
+        function addNonProduct() {
+            let string = prompt("Precio").split("nn");
+
+
+            let price = parseFloat(string[0]);
+            if (isNaN(price)) { return; }
+
+
+            if (string.length === 1) {
+                createProductItem("0170001", "Productos Varios", price);
+            } else if (string.length === 2) {
+                createProductItem("0170001", string[1].trim().toUpperCase(), price);
+            }
+
+            showProducts();
+        }
+        function downloadasTextFile(filename, text) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+
+
+    </script>
+
+</body>
+
+</html>
