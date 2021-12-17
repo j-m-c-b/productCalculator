@@ -28,7 +28,7 @@
         var url_string = window.location.href;
         var url = new URL(url_string);
         var datos = url.searchParams.get("datos");
-        let info = JSON.parse(datos);
+        let info = JSON.parse(decodeURIComponent(datos));
         var justSee = info.justSee;
 
         function loadpdf(justSee) {
@@ -36,7 +36,7 @@
 
 
             //let info = { titulo, textoArr, type, tamaTitulo, tamaParrafo }
-          
+
             const date = new Date();
             const fecha = `${date.getDate().toString().padStart(2, "0")}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getFullYear()}`;
             const hora = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
@@ -47,15 +47,18 @@
 
 
 
-            let tamaTitulo = info.titulo
+            let tamaTitulo = info.titulo;
             let tamaParrafo = info.tamaParrafo;
 
             let type = "parrafo";
             //   let info = { titulo, textoArr, type, tamaTitulo, tamaParrafo }
 
+            // console.log(info.xoffset);
+            if (!info.xoffset) {
+                info.xoffset = 0;
+            }
 
-
-            let xoffset = 4;
+            let xoffset = 4 + info.xoffset;
             let ySum = 5;
             let y = 22;
 
@@ -69,13 +72,13 @@
             var doc = new jspdf.jsPDF({
                 orientation: "portrait",
                 unit: "mm",
-                format: [82, height + 5]
+                format: [80, height + 5]
             });
             if (justSee === false) {
                 doc.autoPrint({ variant: 'non-conform' });
             }
             doc.setFontSize(8);
-            doc.text(`Fecha: ${fecha} Hora: ${hora}`, 4, 3);
+            doc.text(`Fecha: ${fecha} Hora: ${hora}`, + xoffset, 3);
 
             doc.setFontSize(info.tamaTitulo);
             doc.text(info.titulo, xoffset, 13);
@@ -86,7 +89,8 @@
                 y += ySum;
             }
 
-            doc.text("-------", xoffset, y + 5);
+            //size
+            doc.text("-------", xoffset, y + 12);
 
 
 
