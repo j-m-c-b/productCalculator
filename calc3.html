@@ -121,12 +121,6 @@
         button {
             margin-left: 3px;
         }
-
-        .currentTotalCustom {
-            color: #9eff83;
-            background-color: #211a1a;
-            font-size: 0.7em;
-        }
     </style>
 </head>
 
@@ -386,9 +380,8 @@
 <th>Precio</th>
 </tr>`;
             let totalPrice = 0;
-            let counterCustom = 0;
+
             for (let product of productsList) {
-                counterCustom += 1;
                 let tr = document.createElement("tr");
 
 
@@ -399,20 +392,11 @@
                 let td4 = document.createElement("td");
 
 
-                let td5 = document.createElement("td");
-
-
 
                 td1.innerHTML = `${product.index + 1}X`;
                 td2.textContent = product.name;
                 td3.textContent = product.quantity;
                 td4.textContent = formartNum(product.price * product.quantity);
-
-                let currentTotalCustom = 0;
-                for (let x = 0; x < counterCustom; x++) {
-                    currentTotalCustom += productsList[x].price * productsList[x].quantity;
-                }
-                td5.textContent = formartNum(currentTotalCustom);
 
                 td4.classList.add("price");
                 if (product.price > 0) {
@@ -421,7 +405,7 @@
                     td1.classList.add("negative")
                 }
 
-                td5.classList.add("currentTotalCustom")
+
                 td3.classList.add("quantityButtom");
                 td1.classList.add("closeButtom");
 
@@ -429,7 +413,6 @@
                 tr.appendChild(td2);
                 tr.appendChild(td3);
                 tr.appendChild(td4);
-                tr.appendChild(td5);
 
                 document.getElementById("tableProducts").appendChild(tr);
 
@@ -451,8 +434,6 @@
                 totalPrice += (product.price * product.quantity);
 
             }
-            counterCustom = 0;
-
             document.getElementById("domTotalPrice").innerText = formartNum(totalPrice);
 
 
