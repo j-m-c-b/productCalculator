@@ -190,9 +190,13 @@
             window.arr = [];
         }
 
-        if(changesArr){
-             arr.unshift(...changesArr);
+        if (!window.changesArr) {
+            window.changesArr = [];
         }
+
+        
+        arr.unshift(...changesArr);
+       
        
         let audioAdd = new Audio("sounds/add.mp3")
         let audioDelete = new Audio("sounds/delete.mp3")
